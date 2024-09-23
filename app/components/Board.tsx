@@ -16,6 +16,7 @@ const Board: React.FC = () => {
   const [board, setBoard] = useState<CellType[][]>([]);
   const [gameOver, setGameOver] = useState(false);
   const [win, setWin] = useState(false);
+  const [firstClick, setFirstClick] = useState(true);
 
   const rows = 10;
   const cols = 10;
@@ -23,48 +24,66 @@ const Board: React.FC = () => {
 
   const initializeBoard = () => {
     let newBoard = createEmptyBoard(rows, cols, minesCount);
-    newBoard = plantMines(newBoard, minesCount);
     newBoard = calculateAdjacentMines(newBoard);
     setBoard(newBoard);
     setGameOver(false);
     setWin(false);
+    setFirstClick(true); 
   };
 
   const handleClick = (cell: CellType) => {
-    if (gameOver || win) return;
+    if (gameOver || win || cell.isRevealed || cell.isFlagged) return;
 
-    let newBoard = [...board];
+    let newBoard = board.map(row => row.map(c => ({ ...c }))); 
+
+    if (firstClick) {
+
+      newBoard = plantMines(newBoard, minesCount);
+      newBoard = calculateAdjacentMines(newBoard);
+      setFirstClick(false);
+    }
+
     newBoard = revealCell(newBoard, cell.x, cell.y);
 
-    if(newBoard[cell.x][cell.y].isMine){
-        setGameOver(true);
-        newBoard = (revealAllMines(newBoard))
+    if (newBoard[cell.x][cell.y].isMine) {
+      setGameOver(true);
+      newBoard = revealAllMines(newBoard);
+    } else if (checkWin(newBoard)) {
+      setWin(true);
+      newBoard = revealAllMines(newBoard);
     }
-    else if(checkWin(newBoard)){
-        setWin(true);
-        newBoard = (revealAllMines(newBoard))
-    }
+
     setBoard(newBoard);
   };
 
   const handleCellRightClick = (e: React.MouseEvent, cell: CellType) => {
     e.preventDefault();
-    if(gameOver||win)return;
+    if (gameOver || win || cell.isRevealed) return;
 
-    let newBoard = [...board];
+    let newBoard = board.map(row => row.map(c => ({ ...c }))); 
     newBoard = toggleFlag(newBoard, cell.x, cell.y);
     setBoard(newBoard);
-  }
+  };
 
   useEffect(() => {
-    initializeBoard()
+    initializeBoard();
   }, []);
 
-    return (
+  return (
     <div className="flex flex-col items-center">
       <div className="mb-4 text-xl font-bold">
-        {gameOver ? 'Game Over' : win ? 'You Win!' : 'Keep Going!'}
+        {gameOver ? 'Game Over' : win ? 'You Win!' : ' '}
       </div>
+      
+      <div className="flex justify-evenly w-full max-w-lg mb-4">
+        <div>
+          Time
+        </div>
+        <div>
+          Mines
+        </div>
+      </div>
+      
       <div className="grid grid-cols-10 gap-0.5">
         {board.flat().map((cell) => (
           <Cell
@@ -72,9 +91,11 @@ const Board: React.FC = () => {
             cell={cell}
             onClick={() => handleClick(cell)}
             onContextMenu={(e) => handleCellRightClick(e, cell)}
+            gameOver={gameOver}
           />
         ))}
       </div>
+      
       {(gameOver || win) && (
         <button
           className="mt-4 px-4 py-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-600"

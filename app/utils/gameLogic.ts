@@ -79,7 +79,7 @@ export const revealCell = (board: Cell[][], row: number, col: number): Cell[][] 
         const adjacent = getAdjacentCells(board, row, col);
         adjacent.forEach((adjCell) => {
             if (!adjCell.isRevealed && !adjCell.isFlagged) {
-                board = revealCell(board, adjCell.x, adjCell.y); // Recursively reveal adjacent cells
+                board = revealCell(board, adjCell.x, adjCell.y); 
             }
         });
     }

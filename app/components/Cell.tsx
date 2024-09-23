@@ -4,10 +4,14 @@ type CellProps = {
   cell: CellType;
   onClick: () => void;
   onContextMenu: (e: React.MouseEvent) => void;
+  gameOver: boolean;
 };
 
-const Cell: React.FC<CellProps> = ({ cell, onClick, onContextMenu }) => {
-    
+const Cell: React.FC<CellProps> = ({ cell, onClick, onContextMenu, gameOver }) => {
+  
+  let cellBg = 'bg-blue-500';
+  let textColor = '';
+
   const getTextColor = (adjacentMines: number) => {
     switch (adjacentMines) {
       case 1:
@@ -26,23 +30,24 @@ const Cell: React.FC<CellProps> = ({ cell, onClick, onContextMenu }) => {
         return "text-black";
     }
   };
-
-  let cellClass =
-  "w-8 h-8 border border-gray-600 flex items-center justify-center cursor-pointer ";
-
+  
+  
 if (cell.isRevealed) {
   if (cell.isMine) {
-    cellClass += "bg-red-600 text-white";
+    cellBg = "bg-red-600 text-white";
   } else {
-    cellClass += "bg-gray-200";
+    cellBg = "bg-gray-300";
     if (cell.adjacentMines > 0) {
-      cellClass += ` ${getTextColor(cell.adjacentMines)}`;
+      textColor = ` ${getTextColor(cell.adjacentMines)}`;
     }
   }
 } else if (cell.isFlagged) {
-  cellClass += "bg-yellow-400 text-white"; 
+  cellBg = "bg-yellow-400";
+  textColor = "text-white" 
 }
 
+let cellClass =
+  `w-8 h-8 rounded-sm flex items-center justify-center ${!gameOver?'cursor-pointer':''} ${cellBg} ${textColor}`;
 
   return (
     <div className={cellClass} onClick={onClick} onContextMenu={onContextMenu}>
