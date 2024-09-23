@@ -10,7 +10,7 @@ const MainWindow = dynamic(() => import("../components/minesweeper-main"), {
     loading: () => <p>Loading game...</p>
 })
 
-export default function game(){
+export default function Game(){
     const [numberOfMines, setNumberOfMines] = useState<number>(10);
     return(
         <>
